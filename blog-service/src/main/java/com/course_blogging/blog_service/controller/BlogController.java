@@ -44,7 +44,7 @@ public class BlogController {
     @PutMapping("/{id}")
     public ResponseEntity<BlogResponse> updateBlog(
             @PathVariable Long id,
-            @Valid @RequestBody BlogUpdateRequest request) {
+            @Valid @RequestBody BlogRequest request) {
         return ResponseEntity.ok(
                 blogService.updateBlog(id, request)
         );
