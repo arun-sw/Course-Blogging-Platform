@@ -1,0 +1,9 @@
+package com.course_blogging.blog_service.dto;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class TagRequest {
+    @NotBlank
+    private String name;
+}
