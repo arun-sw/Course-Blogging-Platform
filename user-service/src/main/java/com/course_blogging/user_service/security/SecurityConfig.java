@@ -2,7 +2,7 @@ package com.course_blogging.user_service.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -15,24 +15,37 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    // Password Encoder
     @Bean
-    PasswordEncoder passwordEncoder(){
-        return  new BCryptPasswordEncoder();
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
+    // Security Filter Chain
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtfilter)throws Exception{
-        return http.csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(s-> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .anyRequest().authenticated()
-                 )
-                .addFilterBefore(
-                        jwtfilter,
-                        UsernamePasswordAuthenticationFilter.class
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtFilter)
+            throws Exception {
+        return http
+                // Disable CSRF
+                .csrf(AbstractHttpConfigurer::disable)
+                // Stateless Session
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                // Authorization Rules
+                .authorizeHttpRequests(auth ->
+                        auth
+                                // Authentication APIs are public
+                                .requestMatchers("/auth/**")
+                                .permitAll()
+                                // All other APIs require JWT
+                                .anyRequest()
+                                .authenticated()
+                )
+                // Add JWT filter
+                .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)
                 .build();
-
-
     }
 }

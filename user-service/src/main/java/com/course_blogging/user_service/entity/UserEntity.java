@@ -1,6 +1,9 @@
 package com.course_blogging.user_service.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -22,10 +25,18 @@ public class UserEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
+    @NotBlank(message = "Name is required")
+    @Size(max = 100, message = "Name must be at most 100 characters")
     private String name;
     @Column(nullable = false, unique = true)
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
     private String email;
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must contain at least 6 characters")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+    @Size(max = 500, message = "Bio must be at most 500 characters")
     private String bio;
     @CreationTimestamp
     @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
