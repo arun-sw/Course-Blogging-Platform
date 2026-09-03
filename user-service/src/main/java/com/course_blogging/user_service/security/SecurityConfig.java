@@ -3,6 +3,7 @@ package com.course_blogging.user_service.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -37,12 +38,13 @@ public class SecurityConfig {
                 // Authorization Rules
                 .authorizeHttpRequests(auth ->
                         auth
-                                // Authentication APIs are public
-                                .requestMatchers("/auth/**")
-                                .permitAll()
-                                // All other APIs require JWT
-                                .anyRequest()
-                                .authenticated()
+                                // Auth APIs are public
+                                .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers(HttpMethod.GET,"/users/*").permitAll()
+                                // Swagger permission
+                                  .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                                // All other APIs want to JWT token
+                                .anyRequest().authenticated()
                 )
                 // Add JWT filter
                 .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)

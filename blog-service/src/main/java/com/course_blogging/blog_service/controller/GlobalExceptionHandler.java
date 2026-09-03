@@ -14,6 +14,10 @@ public class GlobalExceptionHandler {
     ResponseEntity<Map<String,String>> forbidden(ForbiddenOperationException e) {
         return error(HttpStatus.FORBIDDEN,e.getMessage());
     }
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException e) {
+        return error(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
     @ExceptionHandler({IllegalArgumentException.class,MethodArgumentNotValidException.class})
     ResponseEntity<Map<String,String>> badRequest(Exception e) { return error(HttpStatus.BAD_REQUEST,"Invalid request"); }
     private ResponseEntity<Map<String,String>> error(HttpStatus status,String message) {

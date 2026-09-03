@@ -58,12 +58,5 @@ public class BlogController {
         blogService.deleteBlog(id, userId);
         return ResponseEntity.noContent().build();
     }
-    // Add Tags To Blog
-    @PostMapping("/{id}/tags")
-    public ResponseEntity<BlogResponse> addTags(
-            @PathVariable Long id,
-            @Valid @RequestBody TagIdsRequest request) {
 
-        return ResponseEntity.ok(blogService.addTags(id, request));
-    }
 }

@@ -3,8 +3,13 @@ package com.course_blogging.blog_service.service;
 import com.course_blogging.blog_service.dto.*;
 import com.course_blogging.blog_service.entity.*;
 import com.course_blogging.blog_service.exception.*;
+import com.course_blogging.blog_service.feign.UserFeignclient;
 import com.course_blogging.blog_service.repository.*;
 
+import com.course_blogging.blog_service.security.UserServiceClient;
+import feign.FeignException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,19 +23,25 @@ public class BlogService {
     private final BlogRepository blogRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
+    private final UserServiceClient userServiceClient;
 
     public BlogService(
             BlogRepository blogRepository,
             CategoryRepository categoryRepository,
-            TagRepository tagRepository) {
+            TagRepository tagRepository,
+            UserFeignclient userFeignClient, UserServiceClient userServiceClient){
 
         this.blogRepository = blogRepository;
         this.categoryRepository = categoryRepository;
         this.tagRepository = tagRepository;
+        this.userServiceClient = userServiceClient;
     }
     // Create Blog
     @Transactional
     public BlogResponse createBlog(BlogRequest request) {
+
+        userServiceClient.requireUser(request.getUserId());
+
         requireCategory(request.getCategoryId());
         Blog blog = new Blog();
         blog.setUserId(request.getUserId());
@@ -38,9 +49,12 @@ public class BlogService {
         blog.setTitle(request.getTitle());
         blog.setContent(request.getContent());
 
-        return toResponse(
-                blogRepository.save(blog)
+        Set<Tag> tags = new HashSet<>(
+                tagRepository.findAllById(request.getTagIds())
         );
+
+        blog.setTags(tags);
+        return toResponse(blogRepository.save(blog));
     }
     // Get All Blogs
     public List<BlogResponse> allBlogs() {
@@ -80,19 +94,6 @@ public class BlogService {
                 userId
         );
         blogRepository.delete(blog);
-    }
-    // Add Tags To Blog
-    @Transactional
-    public BlogResponse addTags(
-            Long id,
-            TagIdsRequest request) {
-        Blog blog = requireBlog(id);
-        Set<Tag> tags = request.getTagIds()
-                .stream()
-                .map(this::requireTag)
-                .collect(Collectors.toSet());
-        blog.getTags().addAll(tags);
-        return toResponse(blog);
     }
     // Find Blog
     private Blog requireBlog(Long id) {
@@ -136,8 +137,8 @@ public class BlogService {
     // Convert Entity → Response DTO
     private BlogResponse toResponse(Blog blog) {
 
-        Set<TagResponse> tagResponses = blog.getTags()
-                .stream()
+        Set<Tag> tags = new HashSet<>(blog.getTags());
+        Set<TagResponse> tagResponses = tags.stream()
                 .map(tag ->new TagResponse(
                                 tag.getId(),
                                 tag.getName(),

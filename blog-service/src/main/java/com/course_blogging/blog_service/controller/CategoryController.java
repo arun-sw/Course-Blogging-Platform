@@ -21,9 +21,7 @@ public class CategoryController {
     // Create Category
     @PostMapping
     public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest request) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(categoryService.createCategory(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(request));
     }
     // Get All Categories
     @GetMapping
@@ -42,7 +40,6 @@ public class CategoryController {
     public ResponseEntity<CategoryResponse> updateCategory(
             @PathVariable Long id,
             @Valid @RequestBody CategoryRequest request) {
-
      return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
     // Delete Category

@@ -29,14 +29,10 @@ public class UserService {
     // Create User
     public UserEntity CreateUser(UserEntity user) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new DuplicateResourceException(
-                    "Email is already registered"
-            );
+            throw new DuplicateResourceException("Email is already registered");
         }
         UserEntity userEntity = new UserEntity();
-        userEntity.setPassword(
-                passwordEncoder.encode(user.getPassword())
-        );
+        userEntity.setPassword(passwordEncoder.encode(user.getPassword())        );
         userEntity.setEmail(user.getEmail());
         userEntity.setName(user.getName());
         userEntity.setBio(user.getBio());

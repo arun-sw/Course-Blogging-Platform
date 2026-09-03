@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Blog-service 8016" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.course_blogging.blog_service.BlogServiceApplication" />
+    <module name="blog-service" />
+    <option name="VM_PARAMETERS" value="-Dserver.port=8016" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
