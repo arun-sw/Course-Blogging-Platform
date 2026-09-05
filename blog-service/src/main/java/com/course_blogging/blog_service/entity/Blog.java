@@ -15,7 +15,7 @@ import java.util.Set;
 @Getter
 public class Blog {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long blogId;
     @Column(nullable = false)
     private Long userId;
     @Column(nullable = false)

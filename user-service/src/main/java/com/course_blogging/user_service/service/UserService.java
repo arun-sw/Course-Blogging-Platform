@@ -3,6 +3,9 @@ package com.course_blogging.user_service.service;
 import com.course_blogging.user_service.DTO.AutheticationResponce;
 import com.course_blogging.user_service.DTO.LoginRequest;
 import com.course_blogging.user_service.entity.UserEntity;
+import com.course_blogging.user_service.event.UserCreatedEvent;
+import com.course_blogging.user_service.event.UserUpdateEvent;
+import com.course_blogging.user_service.producer.UserProducer;
 import com.course_blogging.user_service.repository.UserRepository;
 import com.course_blogging.user_service.security.JWTService;
 import com.course_blogging.user_service.exception.DuplicateResourceException;
@@ -26,6 +29,8 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JWTService jwtService;
+    @Autowired
+    private  UserProducer userProducer;
     // Create User
     public UserEntity CreateUser(UserEntity user) {
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -36,7 +41,18 @@ public class UserService {
         userEntity.setEmail(user.getEmail());
         userEntity.setName(user.getName());
         userEntity.setBio(user.getBio());
-        return userRepository.save(userEntity);
+
+        UserEntity saveduser=userRepository.save(userEntity);
+
+        UserCreatedEvent event=new UserCreatedEvent();
+        event.setUserId(saveduser.getUserId());
+        event.setName(saveduser.getName());
+        event.setEmail(saveduser.getEmail());
+
+        userProducer.sendUserCreated(event);
+        return saveduser;
+
+
     }
     // Get All Users
     public List<UserEntity> GetAllUser() {
@@ -61,7 +77,15 @@ public class UserService {
         userEntity.setEmail(user.getEmail());
         userEntity.setBio(user.getBio());
         userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(userEntity);
+
+        UserEntity updateduser=userRepository.save(userEntity);
+
+        UserUpdateEvent event=new UserUpdateEvent();
+        event.setUserId(updateduser.getUserId());
+        event.setName(updateduser.getName());
+        event.setEmail(updateduser.getEmail());
+        userProducer.sendUserUpdate(event);
+        return updateduser;
     }
     // Delete User
     public void DeleteUser(Long userId) {

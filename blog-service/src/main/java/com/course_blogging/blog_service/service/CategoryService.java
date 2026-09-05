@@ -69,7 +69,7 @@ public class CategoryService {
     // Convert Entity → Response DTO
     private CategoryResponse toResponse(Category category) {
         return new CategoryResponse(
-                category.getId(),
+                category.getCategoryId(),
                 category.getName(),
                 category.getDescription(),
                 category.getCreatedAt()

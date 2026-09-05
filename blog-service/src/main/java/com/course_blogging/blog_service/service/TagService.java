@@ -65,7 +65,7 @@ public class TagService {
     // Convert Entity → Response DTO
     private TagResponse toResponse(Tag tag) {
         return new TagResponse(
-                tag.getId(),
+                tag.getTagId(),
                 tag.getName(),
                 tag.getCreatedAt()
         );

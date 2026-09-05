@@ -2,14 +2,16 @@ package com.course_blogging.blog_service.service;
 
 import com.course_blogging.blog_service.dto.*;
 import com.course_blogging.blog_service.entity.*;
+import com.course_blogging.blog_service.event.BlogCreatedEvent;
+import com.course_blogging.blog_service.event.BlogUpdateEvent;
 import com.course_blogging.blog_service.exception.*;
 import com.course_blogging.blog_service.feign.UserFeignclient;
+import com.course_blogging.blog_service.producer.BlogProducer;
 import com.course_blogging.blog_service.repository.*;
 
 import com.course_blogging.blog_service.security.UserServiceClient;
 import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,37 +26,55 @@ public class BlogService {
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final UserServiceClient userServiceClient;
+    private final BlogProducer blogProducer;
 
     public BlogService(
             BlogRepository blogRepository,
             CategoryRepository categoryRepository,
             TagRepository tagRepository,
-            UserFeignclient userFeignClient, UserServiceClient userServiceClient){
+            UserFeignclient userFeignClient, UserServiceClient userServiceClient, BlogProducer blogProducer){
 
         this.blogRepository = blogRepository;
         this.categoryRepository = categoryRepository;
         this.tagRepository = tagRepository;
         this.userServiceClient = userServiceClient;
+        this.blogProducer = blogProducer;
     }
     // Create Blog
     @Transactional
     public BlogResponse createBlog(BlogRequest request) {
 
+        // Check user exists
         userServiceClient.requireUser(request.getUserId());
 
+        // Check category exists
         requireCategory(request.getCategoryId());
+
+        // Create blog
         Blog blog = new Blog();
+
         blog.setUserId(request.getUserId());
         blog.setCategoryId(request.getCategoryId());
         blog.setTitle(request.getTitle());
         blog.setContent(request.getContent());
 
+        // Set tags
         Set<Tag> tags = new HashSet<>(
                 tagRepository.findAllById(request.getTagIds())
         );
 
         blog.setTags(tags);
-        return toResponse(blogRepository.save(blog));
+
+        Blog savedBlog = blogRepository.save(blog);
+
+        BlogCreatedEvent event = new BlogCreatedEvent();
+
+        event.setBlogId(savedBlog.getBlogId());
+        event.setUserId(savedBlog.getUserId());
+        event.setTitle(savedBlog.getTitle());
+
+        blogProducer.sendBlogCreated(event);
+        return toResponse(savedBlog);
     }
     // Get All Blogs
     public List<BlogResponse> allBlogs() {
@@ -76,14 +96,27 @@ public class BlogService {
     }
     // Update Blog
     @Transactional
-    public BlogResponse updateBlog(Long id,BlogRequest request) {
+    public BlogResponse updateBlog(Long id, BlogRequest request) {
+
         Blog blog = requireBlog(id);
-        verifyOwner(blog,request.getUserId());
+        verifyOwner(blog, request.getUserId());
         requireCategory(request.getCategoryId());
+
         blog.setTitle(request.getTitle());
         blog.setContent(request.getContent());
         blog.setCategoryId(request.getCategoryId());
-        return toResponse(blog);
+
+        Blog updatedBlog = blogRepository.save(blog);
+
+        BlogUpdateEvent event = new BlogUpdateEvent();
+
+        event.setBlogId(updatedBlog.getBlogId());
+        event.setUserId(updatedBlog.getUserId());
+        event.setTitle(updatedBlog.getTitle());
+
+        blogProducer.sendBlogUpdate(event);
+
+        return toResponse(updatedBlog);
     }
     // Delete Blog
     @Transactional
@@ -140,7 +173,7 @@ public class BlogService {
         Set<Tag> tags = new HashSet<>(blog.getTags());
         Set<TagResponse> tagResponses = tags.stream()
                 .map(tag ->new TagResponse(
-                                tag.getId(),
+                                tag.getTagId(),
                                 tag.getName(),
                                 tag.getCreatedAt()
                         )
@@ -148,7 +181,7 @@ public class BlogService {
                 .collect(Collectors.toSet());
 
         return new BlogResponse(
-                blog.getId(),
+                blog.getBlogId(),
                 blog.getUserId(),
                 blog.getCategoryId(),
                 blog.getTitle(),

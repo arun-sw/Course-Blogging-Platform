@@ -36,15 +36,12 @@ public class BlogController {
     }
     // Get Blogs By User
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<BlogResponse>> getBlogsByUser(
-            @PathVariable Long userId) {
+    public ResponseEntity<List<BlogResponse>> getBlogsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(blogService.blogsByUser(userId));
     }
     // Update Blog
     @PutMapping("/{id}")
-    public ResponseEntity<BlogResponse> updateBlog(
-            @PathVariable Long id,
-            @Valid @RequestBody BlogRequest request) {
+    public ResponseEntity<BlogResponse> updateBlog(@PathVariable Long id,@Valid @RequestBody BlogRequest request) {
         return ResponseEntity.ok(
                 blogService.updateBlog(id, request)
         );

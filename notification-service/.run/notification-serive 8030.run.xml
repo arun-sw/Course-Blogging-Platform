@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="notification-serive 8030" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.course_blogging.notification_service.NotificationServiceApplication" />
+    <module name="notification-service" />
+    <option name="VM_PARAMETERS" value="-Dserver.port=8030" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
