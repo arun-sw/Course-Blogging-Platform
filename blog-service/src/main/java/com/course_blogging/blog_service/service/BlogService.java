@@ -145,13 +145,7 @@ public class BlogService {
     }
     // Find Tag
     private Tag requireTag(Long id) {
-
-        return tagRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Tag not found: " + id
-                        )
-                );
+        return tagRepository.findById(id).orElseThrow(() ->new ResourceNotFoundException("Tag not found: " + id));
     }
 
     // Verify Blog Owner

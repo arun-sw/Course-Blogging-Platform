@@ -13,14 +13,7 @@ public class NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    public @Nullable List<Notification> GetAllNotification() {
-        return notificationRepository.findAll();
-    }
-    public @Nullable List<Notification> GetByUserId(Long userId) {
+    public List<Notification> getByAuthenticatedUserId(Long userId) {
      return notificationRepository.findByUserId(userId);
-    }
-
-    public @Nullable List<Notification> GetByBlogId(Long blogId) {
-        return notificationRepository.findByBlogId(blogId);
     }
 }

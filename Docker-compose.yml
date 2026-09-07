@@ -1,0 +1,164 @@
+services:
+  eureka-service:
+    build: ./service-registery
+    container_name: euraka-server
+    ports:
+       - "8761:8761"
+    networks:
+      - course-blogging-network
+
+  user-mysql:
+    image: mysql:8.0
+    container_name: user-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Arun@2200
+      MYSQL_DATABASE: userservice_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - user-mysql-data:/var/lib/mysql
+    networks:
+      - course-blogging-network
+
+  course-mysql:
+    image: mysql:8.0
+    container_name: course-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Arun@2200
+      MYSQL_DATABASE: blog_db
+    ports:
+      - "3308:3306"
+    volumes:
+      - course-mysql-data:/var/lib/mysql
+    networks:
+      - course-blogging-network
+
+  notification-mysql:
+    image: mysql:8.0
+    container_name: notification-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Arun@2200
+      MYSQL_DATABASE: notification_db
+    ports:
+      - "3309:3306"
+    volumes:
+      - notification-mysql-data:/var/lib/mysql
+    networks:
+      - course-blogging-network
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "8015:8015"
+    depends_on:
+      - eureka-service
+      - user-mysql
+    networks:
+      - course-blogging-network
+
+  blog-service:
+    build: ./blog-service
+    container_name: blog-service
+    ports:
+      - "8016:8016"
+    depends_on:
+      - eureka-service
+      - course-mysql
+    networks:
+      - course-blogging-network
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8020:8020"
+    depends_on:
+      - eureka-service
+      - user-service
+      - blog-service
+      - notification-service
+    networks:
+      - course-blogging-network
+
+  kafka:
+    image: apache/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:9093,EXTERNAL://:9092,CONTROLLER://:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9094
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+      KAFKA_NUM_PARTITIONS: 3
+
+    networks:
+      - course-blogging-network
+
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local-kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+    depends_on:
+      - kafka
+    networks:
+      - course-blogging-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-server
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api-gateway
+    networks:
+      - course-blogging-network
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8030:8030"
+    depends_on:
+      - kafka
+      - eureka-service
+      - notification-mysql
+    networks:
+      - course-blogging-network
+networks:
+  course-blogging-network:
+
+volumes:
+  user-mysql-data:
+  course-mysql-data:
+  notification-mysql-data:
+  kafka-data:

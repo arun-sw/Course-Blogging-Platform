@@ -27,7 +27,7 @@ public class KafkaConsumerConfig {
 
         Map<String, Object> props = new HashMap<>();
 
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,"kafka:9093");
 
         props.put(ConsumerConfig.GROUP_ID_CONFIG,"notification-group");
 

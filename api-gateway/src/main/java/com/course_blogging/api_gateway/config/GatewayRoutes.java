@@ -17,7 +17,7 @@ public class GatewayRoutes {
     public RouterFunction<ServerResponse> userServiceRoutes() {
         return route("user-service")
                 .route(path("/users/**").or(path("/auth/**")), http())
-                .before(uri("http://localhost:8015"))
+                .before(uri("http://user-service:8015"))
                 .build();
     }
     @Bean
@@ -26,7 +26,14 @@ public class GatewayRoutes {
                 .route(path("/blogs/**").or(path("/categories/**")).or(path("/tags/**")),
                         http()
                 )
-                .before(uri("http://localhost:8016"))
+                .before(uri("http://blog-service:8016"))
+                .build();
+    }
+    @Bean
+    public RouterFunction<ServerResponse> notificationServiceRoutes() {
+        return route("notification-service")
+                .route(path("/notification/**"), http())
+                .before(uri("http://notification-service:8030"))
                 .build();
     }
     @Bean
@@ -34,7 +41,7 @@ public class GatewayRoutes {
         return route("user-service-api-docs")
                 .route(path("/api-docs/user-service"), http())
                 .before(rewritePath("/api-docs/user-service", "/v3/api-docs"))
-                .before(uri("http://localhost:8015"))
+                .before(uri("http://user-service:8015"))
                 .build();
     }
 
@@ -43,7 +50,7 @@ public class GatewayRoutes {
         return route("blog-service-api-docs")
                 .route(path("/api-docs/blog-service"), http())
                 .before(rewritePath("/api-docs/blog-service", "/v3/api-docs"))
-                .before(uri("http://localhost:8016"))
+                .before(uri("http://blog-service:8016"))
                 .build();
     }
 }
