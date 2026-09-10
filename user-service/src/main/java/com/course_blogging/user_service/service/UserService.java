@@ -2,6 +2,7 @@ package com.course_blogging.user_service.service;
 
 import com.course_blogging.user_service.DTO.AutheticationResponce;
 import com.course_blogging.user_service.DTO.LoginRequest;
+import com.course_blogging.user_service.entity.AuthType;
 import com.course_blogging.user_service.entity.UserEntity;
 import com.course_blogging.user_service.event.UserCreatedEvent;
 import com.course_blogging.user_service.event.UserUpdateEvent;
@@ -41,7 +42,7 @@ public class UserService {
         userEntity.setEmail(user.getEmail());
         userEntity.setName(user.getName());
         userEntity.setBio(user.getBio());
-
+        userEntity.setAuthType(AuthType.NORMAL);
         UserEntity saveduser=userRepository.save(userEntity);
 
         UserCreatedEvent event=new UserCreatedEvent();

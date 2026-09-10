@@ -31,7 +31,6 @@ public class UserController {
     @Operation(summary = "List users", description = "Returns every registered user.")
     @ApiResponse(responseCode = "200", description = "Users retrieved successfully")
     public List<UserEntity> GetAllUser() {
-
         return userService.GetAllUser();
     }
     // Get User By ID

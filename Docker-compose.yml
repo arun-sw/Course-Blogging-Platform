@@ -51,9 +51,13 @@ services:
     container_name: user-service
     ports:
       - "8015:8015"
+    environment:
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
     depends_on:
       - eureka-service
       - user-mysql
+      - kafka
     networks:
       - course-blogging-network
 
@@ -65,6 +69,7 @@ services:
     depends_on:
       - eureka-service
       - course-mysql
+      - kafka
     networks:
       - course-blogging-network
 

@@ -1,6 +1,7 @@
 package com.course_blogging.user_service.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -32,12 +33,16 @@ public class UserEntity implements UserDetails {
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
     private String email;
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must contain at least 6 characters")
+    @Column(nullable = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     @Size(max = 500, message = "Bio must be at most 500 characters")
     private String bio;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Auth_type")
+    private AuthType authType;
+    @Column(name = "provider_id")
+    private String providerId;
     @CreationTimestamp
     @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createAt;

@@ -29,11 +29,7 @@ public class JWTService {
                 .subject(user.getEmail())
                 .claim("user ID:", user.getUserId())
                 .issuedAt(now)
-                .expiration(
-                        new Date(
-                                now.getTime() + expirancetime
-                        )
-                )
+                .expiration(new Date(now.getTime() + expirancetime))
                 .signWith(key)
                 .compact();
     }
