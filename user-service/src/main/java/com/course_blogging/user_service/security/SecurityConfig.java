@@ -11,7 +11,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -36,7 +35,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // Stateless Session
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 // Authorization Rules
                 .authorizeHttpRequests(auth ->
@@ -53,7 +52,7 @@ public class SecurityConfig {
                 )
                 // Oauth login
                 .oauth2Login(oauth -> oauth
-                        .successHandler((AuthenticationSuccessHandler) successHandler)
+                        .successHandler(successHandler)
                 )
                 // Add JWT filter
                 .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)

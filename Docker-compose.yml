@@ -58,6 +58,8 @@ services:
       - eureka-service
       - user-mysql
       - kafka
+    volumes:
+      - ./logs/user-service:/app/logs
     networks:
       - course-blogging-network
 
@@ -70,9 +72,10 @@ services:
       - eureka-service
       - course-mysql
       - kafka
+    volumes:
+      - ./logs/blog-service:/app/logs
     networks:
       - course-blogging-network
-
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -124,13 +127,11 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
-
     ports:
       - "8080:8080"
-
     environment:
       KAFKA_CLUSTERS_0_NAME: local-kafka
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+      KAFKA_CLUSTERS_0_BOOTSTRAP SERVERS: kafka:9093
     depends_on:
       - kafka
     networks:
@@ -159,8 +160,11 @@ services:
       - notification-mysql
     networks:
       - course-blogging-network
+
 networks:
   course-blogging-network:
+    external: true
+    name: courseblogging_course-blogging-network
 
 volumes:
   user-mysql-data:

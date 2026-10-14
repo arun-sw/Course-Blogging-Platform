@@ -27,6 +27,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Swagger permission
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        //blog get permit
+                        .requestMatchers(HttpMethod.GET,"/blogs/**").permitAll()
                         // Public content discovery. Mutating blog, category and tag APIs remain authenticated.
                         .anyRequest().authenticated()
                 )

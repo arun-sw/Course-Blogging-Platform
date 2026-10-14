@@ -21,18 +21,6 @@ public class UserProducer {
     public void sendUserCreated(UserCreatedEvent event){
         log.info("Sending UserCreatedEvent: userId={}", event.getUserId());
         kafkaTemplate.send("user_created",event.getUserId().toString(),event).whenComplete((result, ex) -> {
-
-            if (ex == null) {
-                log.info(
-                        "SUCCESS: UserCreatedEvent sent to Kafka. topic={}, partition={}, offset={}",
-                        result.getRecordMetadata().topic(),
-                        result.getRecordMetadata().partition(),
-                        result.getRecordMetadata().offset()
-                );
-            } else {
-                log.error("FAILED: UserCreatedEvent was NOT sent to Kafka",ex
-                );
-            }
         });
 
     }

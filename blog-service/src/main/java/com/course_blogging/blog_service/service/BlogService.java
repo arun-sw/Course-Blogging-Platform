@@ -12,6 +12,8 @@ import com.course_blogging.blog_service.repository.*;
 import com.course_blogging.blog_service.security.UserServiceClient;
 import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,8 @@ public class BlogService {
     private final TagRepository tagRepository;
     private final UserServiceClient userServiceClient;
     private final BlogProducer blogProducer;
+    private static final Logger logger = LogManager.getLogger(BlogService.class);
+
 
     public BlogService(
             BlogRepository blogRepository,
@@ -59,14 +63,11 @@ public class BlogService {
         blog.setContent(request.getContent());
 
         // Set tags
-        Set<Tag> tags = new HashSet<>(
-                tagRepository.findAllById(request.getTagIds())
-        );
-
+        Set<Tag> tags = new HashSet<>(tagRepository.findAllById(request.getTagIds()));
         blog.setTags(tags);
 
         Blog savedBlog = blogRepository.save(blog);
-
+        logger.info("blog was created");
         BlogCreatedEvent event = new BlogCreatedEvent();
 
         event.setBlogId(savedBlog.getBlogId());
@@ -107,40 +108,29 @@ public class BlogService {
         blog.setCategoryId(request.getCategoryId());
 
         Blog updatedBlog = blogRepository.save(blog);
-
         BlogUpdateEvent event = new BlogUpdateEvent();
-
         event.setBlogId(updatedBlog.getBlogId());
         event.setUserId(updatedBlog.getUserId());
         event.setTitle(updatedBlog.getTitle());
-
         blogProducer.sendBlogUpdate(event);
-
         return toResponse(updatedBlog);
     }
     // Delete Blog
     @Transactional
     public void deleteBlog(Long id, Long userId) {
         Blog blog = requireBlog(id);
-        verifyOwner(
-                blog,
-                userId
-        );
+        verifyOwner(blog,userId);
         blogRepository.delete(blog);
     }
     // Find Blog
     private Blog requireBlog(Long id) {
         return blogRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Blog not found: " + id)
-                );
+                .orElseThrow(() ->new ResourceNotFoundException("Blog not found: " + id));
     }
     // Check Category
     private void requireCategory(Long id) {
         if (!categoryRepository.existsById(id)) {
-            throw new ResourceNotFoundException(
-                    "Category not found: " + id
-            );
+            throw new ResourceNotFoundException("Category not found: " + id);
         }
     }
     // Find Tag
@@ -149,30 +139,17 @@ public class BlogService {
     }
 
     // Verify Blog Owner
-    private void verifyOwner(
-            Blog blog,
-            Long userId) {
-
+    private void verifyOwner(Blog blog,Long userId) {
         if (!blog.getUserId().equals(userId)) {
-
-            throw new ForbiddenOperationException(
-                    "Only the blog owner can perform this action"
-            );
+            throw new ForbiddenOperationException("Only the blog owner can perform this action");
         }
     }
     // Convert Entity → Response DTO
     private BlogResponse toResponse(Blog blog) {
-
         Set<Tag> tags = new HashSet<>(blog.getTags());
         Set<TagResponse> tagResponses = tags.stream()
-                .map(tag ->new TagResponse(
-                                tag.getTagId(),
-                                tag.getName(),
-                                tag.getCreatedAt()
-                        )
-                )
+                .map(tag ->new TagResponse(tag.getTagId(),tag.getName(),tag.getCreatedAt()))
                 .collect(Collectors.toSet());
-
         return new BlogResponse(
                 blog.getBlogId(),
                 blog.getUserId(),
