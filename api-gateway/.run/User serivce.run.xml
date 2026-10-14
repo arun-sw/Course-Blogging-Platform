@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Api-Gateway 8020" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="com.course_blogging.api_gateway.ApiGatewayApplication" />
+  <configuration default="false" name="User serivce" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.course_blogging.user_service.UserServiceApplication" />
     <module name="api-gateway" />
     <option name="VM_PARAMETERS" value="-Dserver.port=8020" />
     <method v="2">
